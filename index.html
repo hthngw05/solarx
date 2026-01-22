@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SolarX Dashboard</title>
+
+  <style>
+    :root{
+      --bg:#070b18;
+      --panel:#0e1633;
+      --panel2:#0b122a;
+      --text:#e9eefc;
+      --muted:rgba(233,238,252,.65);
+      --stroke:rgba(255,255,255,.08);
+      --shadow:0 18px 50px rgba(0,0,0,.45);
+      --radius:20px;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      color:var(--text);
+      background:radial-gradient(1200px 600px at 15% 15%, #0f1c4a 0%, var(--bg) 55%) fixed;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      padding:40px;
+    }
+
+    h1{
+      margin:0 0 18px 0;
+      font-weight:750;
+      letter-spacing:.2px
+    }
+
+    .wrap{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:22px;
+      align-items:start
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--stroke);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:22px;
+      backdrop-filter: blur(10px);
+    }
+
+    .label{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:14px
+    }
+
+    .big{
+      font-size:44px;
+      font-weight:800;
+      line-height:1.05;
+      margin-top:6px
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      margin-top:14px;
+      padding-top:14px;
+      border-top:1px solid var(--stroke)
+    }
+
+    .k{
+      color:var(--muted);
+      font-size:13px
+    }
+
+    .v{
+      font-size:16px;
+      font-weight:650
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
+      background:rgba(0,0,0,.18);
+      margin-top:10px;
+      font-weight:700;
+      letter-spacing:.3px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:14px
+    }
+
+    .mini{
+      background:rgba(0,0,0,.18);
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      padding:16px;
+    }
+
+    .mini .val{
+      font-size:28px;
+      font-weight:800;
+      margin-top:6px
+    }
+
+    .btnbar{
+      display:flex;
+      gap:12px;
+      margin-top:18px
+    }
+
+    button{
+      flex:1;
+      border:1px solid var(--stroke);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:14px;
+      font-weight:750;
+      cursor:pointer;
+    }
+
+    button:hover{background:rgba(255,255,255,.10)}
+    button:disabled{opacity:.5; cursor:not-allowed}
+
+    .toast{
+      margin-top:12px;
+      color:var(--muted);
+      font-size:13px;
+      min-height:18px
+    }
+
+    .right{
+      min-height:520px;
+      display:grid;
+      grid-template-rows: auto auto 1fr;
+      gap:14px;
+    }
+
+    .titleRow{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px
+    }
+
+    .small{
+      color:var(--muted);
+      font-size:13px
+    }
+
+    iframe{
+      width:100%;
+      height:520px;
+      border:0;
+      display:block;
+      background:rgba(0,0,0,.15);
+    }
+  </style>
+</head>
+
+<body>
+<h1>SolarX Dashboard</h1>
+
+<div class="wrap">
+
+  <!-- LEFT PANEL -->
+  <div class="card">
+    <div class="label">Device</div>
+    <div id="device" class="big">-</div>
+
+    <div id="pill" class="status-pill">
+      <span id="dot" class="dot"></span>
+      <span id="status">-</span>
+    </div>
+
+    <div class="label">Soiling Ratio (SR)</div>
+    <div id="sr" class="big">-</div>
+
+    <div class="label">Power (W)</div>
+    <div id="power" class="big">-</div>
+
+    <div class="row">
+      <div>
+        <div class="k">Irradiance (lux)</div>
+        <div id="lux" class="v">-</div>
+      </div>
+      <div>
+        <div class="k">Voltage (V)</div>
+        <div id="voltage" class="v">-</div>
+      </div>
+      <div>
+        <div class="k">Current (A)</div>
+        <div id="current" class="v">-</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <div class="k">Clean attempts</div>
+        <div id="attempts" class="v">-</div>
+      </div>
+      <div>
+        <div class="k">Last command</div>
+        <div id="lastcmd" class="v">-</div>
+      </div>
+    </div>
+
+    <div class="label">Timestamp</div>
+    <div id="ts" class="v">-</div>
+
+    <div class="btnbar">
+      <button onclick="forceClean()">Force Clean</button>
+      <button onclick="manualDone()">Manual Done</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right">
+
+    <div class="card titleRow">
+      <div>
+        <div style="font-weight:800; font-size:16px">Analytics</div>
+        <div class="small">Embedded QuickSight dashboard</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="mini">
+        <div class="small">Expected Power (W)</div>
+        <div id="ep" class="val">-</div>
+      </div>
+      <div class="mini">
+        <div class="small">Status Source</div>
+        <div id="src" class="val">-</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+      <iframe id="qsFrame" title="SolarX Analytics"></iframe>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://qttukmuwnl.execute-api.ap-southeast-2.amazonaws.com/prod";
+const DEVICE_ID = "SolarX_Device_01";
+const EMBED_ENDPOINT = `${API_BASE}/embed`;
+
+function fmt(n, dp=2){
+  if(n === null || n === undefined) return "-";
+  const x = Number(n);
+  return Number.isNaN(x) ? "-" : x.toFixed(dp);
+}
+
+function setStatusPill(status){
+  const dot = document.getElementById("dot");
+  if(status === "NORMAL") dot.style.background = "#33d17a";
+  else if(status === "DIRTY") dot.style.background = "#ffb300";
+  else if(status === "LOW_LIGHT") dot.style.background = "#b39ddb";
+  else dot.style.background = "#999";
+}
+
+async function refresh(){
+  const res = await fetch(`${API_BASE}/latest?device_id=${DEVICE_ID}`);
+  const d = await res.json();
+
+  document.getElementById("device").textContent = d.device_id;
+  document.getElementById("status").textContent = d.status || d.last_status;
+  setStatusPill(d.status || d.last_status);
+
+  document.getElementById("sr").textContent = fmt(d.soiling_ratio,2);
+  document.getElementById("power").textContent = fmt(d.power_w,2);
+  document.getElementById("lux").textContent = fmt(d.irradiance_lux,0);
+  document.getElementById("voltage").textContent = fmt(d.voltage_v,2);
+  document.getElementById("current").textContent = fmt(d.current_a,2);
+  document.getElementById("attempts").textContent = d.clean_attempts;
+  document.getElementById("lastcmd").textContent = d.last_command_sent;
+  document.getElementById("ts").textContent = d.timestamp;
+  document.getElementById("ep").textContent = fmt(d.expected_power_w,2);
+  document.getElementById("src").textContent = d.status ? "READINGS" : "STATE";
+}
+
+async function loadEmbed(){
+  const res = await fetch(EMBED_ENDPOINT);
+  const data = await res.json();
+  document.getElementById("qsFrame").src = data.embedUrl;
+}
+
+async function post(path, payload){
+  await fetch(`${API_BASE}${path}`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
+  });
+}
+
+function forceClean(){
+  post("/force-clean", { device_id: DEVICE_ID, duration_sec:20 });
+}
+
+function manualDone(){
+  post("/manual-done", { device_id: DEVICE_ID });
+}
+
+refresh();
+loadEmbed();
+
+setInterval(refresh, 5000);
+setInterval(loadEmbed, 55 * 60 * 1000);
+</script>
+</body>
+</html>
