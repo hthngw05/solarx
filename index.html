@@ -1,768 +1,248 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SolarX Admin Dashboard</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SolarX Pro | Smart Monitoring</title>
 
   <style>
-    :root{
-      --bg:#0b1022;
-      --panel:#0f1733;
-      --panel2:#0c1330;
-      --card:#0f193b;
-      --stroke:rgba(255,255,255,.08);
-      --text:#eaf0ff;
-      --muted:rgba(234,240,255,.65);
-      --muted2:rgba(234,240,255,.45);
-      --good:#2ee59d;
-      --warn:#ffd166;
-      --bad:#ff5c7a;
-      --info:#7aa2ff;
-      --shadow: 0 16px 40px rgba(0,0,0,.45);
-      --radius:18px;
-      --radius2:14px;
+    :root {
+      --bg: #050814;
+      --panel: rgba(14, 22, 51, 0.8);
+      --text: #e9eefc;
+      --muted: rgba(233, 238, 252, 0.6);
+      --stroke: rgba(255, 255, 255, 0.1);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      /* Status Colors */
+      --green: #33d17a;
+      --amber: #ffb300;
+      --red: #f66151;
+      --blue: #3584e4;
     }
 
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      color:var(--text);
-      background:
-        radial-gradient(1000px 600px at 12% 10%, #16245e 0%, rgba(11,16,34,.2) 55%) fixed,
-        radial-gradient(900px 600px at 88% 30%, rgba(122,162,255,.18) 0%, rgba(11,16,34,0) 55%) fixed,
-        var(--bg);
+    * { box-sizing: border-box; transition: all 0.3s ease; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: radial-gradient(circle at 10% 10%, #101c44 0%, var(--bg) 60%) fixed;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 30px;
     }
 
-    .app{
-      display:grid;
-      grid-template-columns: 260px 1fr;
-      min-height:100vh;
-    }
+    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 32px; color: #fff; }
 
-    /* Sidebar */
-    .sidebar{
-      padding:18px;
-      border-right:1px solid var(--stroke);
-      background:linear-gradient(180deg, rgba(15,23,51,.9) 0%, rgba(12,19,48,.75) 100%);
-      position:sticky;
-      top:0;
-      height:100vh;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      padding:12px 12px;
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
-      background:rgba(0,0,0,.18);
+    .wrap { display: grid; grid-template-columns: 450px 1fr; gap: 25px; align-items: start; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--stroke);
+      border-radius: 24px;
       box-shadow: var(--shadow);
-    }
-    .logo{
-      width:38px;height:38px;border-radius:12px;
-      background: radial-gradient(circle at 30% 30%, rgba(122,162,255,.9) 0%, rgba(46,229,157,.65) 45%, rgba(255,209,102,.35) 100%);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .brand h1{font-size:16px; margin:0}
-    .brand p{margin:2px 0 0; color:var(--muted); font-size:12px}
-
-    .nav{
-      margin-top:18px;
-      display:flex; flex-direction:column; gap:6px;
-    }
-    .nav .group-title{
-      margin:14px 10px 6px;
-      font-size:11px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--muted2);
-    }
-    .nav a{
-      text-decoration:none;
-      color:var(--text);
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid transparent;
-      display:flex; align-items:center; gap:10px;
-      transition:.15s ease;
-    }
-    .nav a:hover{
-      background:rgba(255,255,255,.05);
-      border-color:var(--stroke);
-    }
-    .nav a.active{
-      background:rgba(122,162,255,.14);
-      border-color:rgba(122,162,255,.28);
-    }
-    .dot{
-      width:9px;height:9px;border-radius:99px;background:var(--info);
-      box-shadow: 0 0 0 4px rgba(122,162,255,.14);
+      padding: 24px;
+      backdrop-filter: blur(15px);
     }
 
-    /* Main */
-    .main{
-      padding:22px;
+    /* Status Glow Logic */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.05);
+      margin: 15px 0;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 13px;
+      border: 1px solid var(--stroke);
     }
 
-    /* Top bar */
-    .topbar{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:14px;
-      margin-bottom:18px;
-    }
-    .search{
-      flex:1;
-      display:flex; align-items:center; gap:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      border:1px solid var(--stroke);
-      background:rgba(0,0,0,.18);
-    }
-    .search input{
-      background:transparent; border:none; outline:none;
-      color:var(--text);
-      width:100%;
-      font-size:13px;
-    }
-    .top-actions{
-      display:flex; align-items:center; gap:10px;
-    }
-    .pill{
-      padding:10px 12px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background:rgba(0,0,0,.18);
-      color:var(--muted);
-      font-size:12px;
-      display:flex; align-items:center; gap:8px;
-      white-space:nowrap;
-    }
+    /* KPI Display */
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+    .kpi-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 18px; border: 1px solid var(--stroke); }
+    .label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+    .big { font-size: 32px; font-weight: 800; margin-top: 5px; font-variant-numeric: tabular-nums; }
 
-    /* Layout grid */
-    .grid{
-      display:grid;
-      grid-template-columns: 1.35fr .65fr;
-      gap:16px;
-    }
+    /* Progress Bar for SR */
+    .sr-container { margin: 20px 0; }
+    .progress-bg { height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 10px; }
+    #srBar { height: 100%; width: 0%; border-radius: 10px; box-shadow: 0 0 15px currentColor; }
 
-    .kpis{
-      display:grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap:12px;
-      margin-bottom:16px;
-    }
+    /* Table-like rows */
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--stroke); font-size: 14px; }
+    .info-row:last-child { border: none; }
 
-    .card{
-      border-radius:var(--radius);
-      border:1px solid var(--stroke);
-      background:linear-gradient(180deg, rgba(15,25,59,.85) 0%, rgba(12,19,48,.65) 100%);
-      box-shadow: var(--shadow);
+    .btn-group { display: flex; gap: 12px; margin-top: 25px; }
+    button {
+      flex: 1;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.08);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
     }
-    .card .inner{ padding:14px 14px 12px; }
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
-    }
-    .value{
-      margin-top:10px;
-      font-size:28px;
-      letter-spacing:-0.02em;
-      font-weight:700;
-    }
-    .sub{
-      margin-top:8px;
-      color:var(--muted2);
-      font-size:12px;
-      line-height:1.35;
-    }
+    button:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+    .btn-primary { background: var(--blue); border: none; }
 
-    .status-badge{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background:rgba(0,0,0,.18);
-      font-size:12px;
-      color:var(--text);
-      margin-top:10px;
-    }
-    .status-dot{ width:9px;height:9px;border-radius:99px; }
-    .good{ background:var(--good); box-shadow:0 0 0 4px rgba(46,229,157,.18); }
-    .warn{ background:var(--warn); box-shadow:0 0 0 4px rgba(255,209,102,.18); }
-    .bad{ background:var(--bad); box-shadow:0 0 0 4px rgba(255,92,122,.18); }
+    .toast-area { margin-top: 15px; height: 20px; font-size: 13px; font-style: italic; color: var(--blue); }
 
-    /* Quick insight */
-    .hero{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap:14px;
-      padding:14px;
-      border-radius:var(--radius);
-      border:1px solid var(--stroke);
-      background:linear-gradient(135deg, rgba(122,162,255,.18) 0%, rgba(46,229,157,.10) 40%, rgba(255,209,102,.08) 100%);
-      box-shadow: var(--shadow);
-      margin-bottom:16px;
-    }
-    .hero h2{
-      margin:0;
-      font-size:18px;
-      letter-spacing:-0.02em;
-    }
-    .hero p{
-      margin:8px 0 0;
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.5;
-    }
-    .hero .actions{
-      display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; align-items:flex-start;
-    }
-    .btn{
-      cursor:pointer;
-      border:none;
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:600;
-      color:var(--text);
-      background:rgba(0,0,0,.22);
-      border:1px solid var(--stroke);
-      transition:.15s ease;
-    }
-    .btn:hover{ transform: translateY(-1px); background:rgba(255,255,255,.06); }
-    .btn.primary{
-      background:rgba(122,162,255,.22);
-      border-color:rgba(122,162,255,.35);
-    }
-    .btn.danger{
-      background:rgba(255,92,122,.18);
-      border-color:rgba(255,92,122,.35);
-    }
-
-    /* Charts */
-    .charts{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-    .chart-card .inner{ padding:14px; }
-    .chart-title{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-    }
-    .chart-title h3{
-      margin:0;
-      font-size:14px;
-      color:var(--text);
-    }
-    .chart-title span{ font-size:12px; color:var(--muted); }
-
-    /* Right column */
-    .side{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:12px;
-    }
-    .mini{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:10px;
-    }
-    .mini .big{
-      font-size:22px; font-weight:800; letter-spacing:-0.02em;
-    }
-    .mini .hint{
-      color:var(--muted2); font-size:12px; margin-top:6px; line-height:1.35;
-    }
-
-    /* Table */
-    table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0 10px;
-    }
-    th{
-      text-align:left;
-      font-size:11px;
-      color:var(--muted2);
-      font-weight:600;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      padding:0 10px;
-    }
-    td{
-      padding:12px 10px;
-      background:rgba(0,0,0,.18);
-      border-top:1px solid var(--stroke);
-      border-bottom:1px solid var(--stroke);
-      font-size:12px;
-      color:var(--text);
-    }
-    td:first-child{
-      border-left:1px solid var(--stroke);
-      border-top-left-radius:14px;
-      border-bottom-left-radius:14px;
-    }
-    td:last-child{
-      border-right:1px solid var(--stroke);
-      border-top-right-radius:14px;
-      border-bottom-right-radius:14px;
-      color:var(--muted);
-    }
-
-    /* Responsive */
-    @media (max-width: 1100px){
-      .grid{ grid-template-columns:1fr; }
-      .kpis{ grid-template-columns: repeat(2,1fr); }
-      .app{ grid-template-columns: 1fr; }
-      .sidebar{ position:relative; height:auto; }
-    }
+    /* Right Side Analytics */
+    iframe { width: 100%; height: 600px; border-radius: 20px; border: 1px solid var(--stroke); background: #000; }
   </style>
 </head>
 
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <h1>SolarX Admin</h1>
-          <p>Monitoring & Cleaning Control</p>
-        </div>
+
+<div class="header-bar">
+  <h1>SolarX <span style="color:var(--blue)">PRO</span></h1>
+  <div id="ts" class="label" style="text-transform:none">Syncing...</div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="label">System Status</div>
+    <div id="pill" class="status-pill">
+      <span id="dot" style="width:12px; height:12px; border-radius:50%"></span>
+      <span id="status">CONNECTING...</span>
+    </div>
+
+    <div class="sr-container">
+      <div class="label">Panel Efficiency (Soiling Ratio)</div>
+      <div id="sr" class="big">-</div>
+      <div class="progress-bg"><div id="srBar"></div></div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-box">
+        <div class="label">Current Power</div>
+        <div id="power" class="big">-</div>
       </div>
-
-      <nav class="nav">
-        <div class="group-title">Dashboard</div>
-        <a class="active" href="#"><span class="dot"></span> Overview</a>
-        <a href="#"><span class="dot" style="background:var(--good)"></span> Devices</a>
-        <a href="#"><span class="dot" style="background:var(--warn)"></span> Alerts</a>
-
-        <div class="group-title">Reports</div>
-        <a href="#"><span class="dot" style="background:var(--info)"></span> Readings</a>
-        <a href="#"><span class="dot" style="background:var(--muted2)"></span> Exports</a>
-
-        <div class="group-title">System</div>
-        <a href="#"><span class="dot" style="background:var(--muted2)"></span> Settings</a>
-        <a href="#"><span class="dot" style="background:var(--muted2)"></span> Help</a>
-      </nav>
-    </aside>
-
-    <main class="main">
-      <div class="topbar">
-        <div class="search">
-          <span style="opacity:.7">🔎</span>
-          <input id="search" placeholder="Search device id, status, logs..." />
-        </div>
-        <div class="top-actions">
-          <div class="pill">🕒 <span id="nowTxt">--</span></div>
-          <div class="pill">👤 Anna</div>
-        </div>
+      <div class="kpi-box">
+        <div class="label">Expected</div>
+        <div id="ep" class="big" style="color:var(--muted)">-</div>
       </div>
+    </div>
 
-      <!-- KPI Cards -->
-      <section class="kpis">
-        <div class="card">
-          <div class="inner">
-            <div class="label">
-              <span>Panel Status</span>
-              <span id="deviceId" style="color:var(--muted)">SolarX_Device_01</span>
-            </div>
-            <div class="status-badge" id="statusBadge">
-              <span class="status-dot warn" id="statusDot"></span>
-              <span id="statusText">DIRTY</span>
-            </div>
-            <div class="sub" id="statusExplain">
-              Output is below baseline under high light. System may trigger cleaning.
-            </div>
-          </div>
-        </div>
+    <div class="card" style="background:rgba(0,0,0,0.1); padding:15px; margin-bottom:15px;">
+      <div class="info-row"><span>Irradiance</span><span id="lux" class="v">-</span></div>
+      <div class="info-row"><span>Voltage / Current</span><span><span id="voltage">-</span>V / <span id="current">-</span>A</span></div>
+      <div class="info-row"><span>Clean Attempts</span><span id="attempts">-</span></div>
+      <div class="info-row"><span>Last Action</span><span id="lastcmd" style="color:var(--blue)">-</span></div>
+    </div>
 
-        <div class="card">
-          <div class="inner">
-            <div class="label"><span>Performance vs Baseline</span><span style="color:var(--muted)">SR Proxy</span></div>
-            <div class="value" id="srVal">0.04</div>
-            <div class="sub">Threshold: <span id="srTh">0.80</span> → below = dirty</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="inner">
-            <div class="label"><span>Power Output</span><span style="color:var(--muted)">W</span></div>
-            <div class="value" id="pVal">21.60</div>
-            <div class="sub">V: <span id="vVal">18.00</span> • I: <span id="iVal">1.20</span></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="inner">
-            <div class="label"><span>Light Intensity</span><span style="color:var(--muted)">lux (proxy)</span></div>
-            <div class="value" id="luxVal">80000</div>
-            <div class="sub">Low-light guard prevents false dirty alerts</div>
-          </div>
-        </div>
-      </section>
-
-      <div class="grid">
-        <!-- Left column -->
-        <div>
-          <div class="hero">
-            <div>
-              <h2>Quick Insight</h2>
-              <p id="quickInsight">
-                Under strong light, output is under baseline. Auto-clean will run up to 3 attempts, then escalate to manual cleaning.
-              </p>
-            </div>
-            <div class="actions">
-              <button class="btn primary" id="btnForce">Force Clean</button>
-              <button class="btn danger" id="btnManual">Manual Done</button>
-              <button class="btn" id="btnRefresh">Refresh</button>
-            </div>
-          </div>
-
-          <div class="charts">
-            <div class="card chart-card">
-              <div class="inner">
-                <div class="chart-title">
-                  <h3>Soiling Ratio (SR) Trend</h3>
-                  <span>Higher = healthier</span>
-                </div>
-                <canvas id="srChart" height="110"></canvas>
-              </div>
-            </div>
-
-            <div class="card chart-card">
-              <div class="inner">
-                <div class="chart-title">
-                  <h3>Power vs Light Proxy</h3>
-                  <span>Helps explain “low power due to low light vs soiling”</span>
-                </div>
-                <canvas id="pvChart" height="110"></canvas>
-              </div>
-            </div>
-
-            <div class="card chart-card">
-              <div class="inner">
-                <div class="chart-title">
-                  <h3>Recent Readings</h3>
-                  <span>Most recent first</span>
-                </div>
-
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Time</th>
-                      <th>Status</th>
-                      <th>SR</th>
-                      <th>Power (W)</th>
-                      <th>Light (lux)</th>
-                      <th>Note</th>
-                    </tr>
-                  </thead>
-                  <tbody id="readingsBody"></tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right column -->
-        <div class="side">
-          <div class="card">
-            <div class="inner">
-              <div class="label"><span>Automation</span><span style="color:var(--muted)">state machine</span></div>
-              <div class="mini" style="margin-top:10px">
-                <div>
-                  <div class="big" id="attemptsTxt">2 / 3</div>
-                  <div class="hint">Cleaning attempts used before manual escalation.</div>
-                </div>
-                <div style="text-align:right">
-                  <div style="color:var(--muted); font-size:12px;">Last command</div>
-                  <div style="margin-top:6px; font-weight:700" id="lastCmd">CLEAN</div>
-                </div>
-              </div>
-              <div class="sub" style="margin-top:12px" id="autoExplain">
-                If SR stays below threshold after max attempts, system requests manual cleaning and waits for verification.
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="inner">
-              <div class="label"><span>What the numbers mean</span><span style="color:var(--muted)">for first-time viewers</span></div>
-              <div class="sub" style="margin-top:10px; line-height:1.6">
-                <b>Power (W)</b> is what the panel is producing now.<br/>
-                <b>Light (lux)</b> is a proxy for how strong the light is.<br/>
-                <b>SR</b> compares current power to the panel’s clean baseline under similar light.<br/>
-                If <b>SR &lt; 0.80</b>, SolarX treats the panel as likely soiled and triggers cleaning.
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="inner">
-              <div class="label"><span>Event Log</span><span style="color:var(--muted)">latest</span></div>
-              <div id="log" class="sub" style="margin-top:10px; line-height:1.65"></div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </main>
+    <div class="btn-group">
+      <button class="btn-primary" onclick="forceClean()">Trigger Auto-Clean</button>
+      <button onclick="manualDone()">Log Manual Repair</button>
+    </div>
+    <div id="toast" class="toast-area"></div>
   </div>
 
-  <script>
-    // ---------------------------
-    // Demo data (replace later with real API calls)
-    // ---------------------------
-    const demoData = {
-      device_id: "SolarX_Device_01",
-      sr_threshold: 0.80,
-      clean_attempts: 2,
-      max_attempts: 3,
-      last_command: "CLEAN",
-      status: "DIRTY", // NORMAL | DIRTY | LOW_LIGHT | MISSING_DATA | VERIFY_PENDING
-      irradiance_lux: 80000,
-      voltage_v: 18.00,
-      current_a: 1.20,
-      power_w: 21.60,
-      sr: 0.04,
-      readings: [
-        {t:"17:38", status:"DIRTY", sr:0.04, p:21.6, lux:80000, note:"Below threshold"},
-        {t:"17:37", status:"DIRTY", sr:0.07, p:22.0, lux:78000, note:"Attempt 2"},
-        {t:"17:36", status:"DIRTY", sr:0.09, p:22.4, lux:76000, note:"Attempt 1"},
-        {t:"17:35", status:"NORMAL", sr:0.85, p:24.2, lux:72000, note:"Recovered"},
-        {t:"17:34", status:"NORMAL", sr:0.90, p:24.8, lux:70000, note:"Baseline ok"},
-      ],
-      series: {
-        labels: ["17:34","17:35","17:36","17:37","17:38"],
-        sr:     [0.90, 0.85, 0.09, 0.07, 0.04],
-        power:  [24.8, 24.2, 22.4, 22.0, 21.6],
-        lux:    [70000,72000,76000,78000,80000]
-      },
-      log: [
-        "CLEAN command sent (attempt 2/3).",
-        "SR below threshold under high light.",
-        "Waiting for next reading to verify improvement."
-      ]
-    };
+  <div class="card" style="padding:10px">
+    <div style="padding:15px">
+      <div class="label">Live Performance Analytics</div>
+      <div style="font-size:12px; color:var(--muted)">Data Source: <span id="src" style="color:var(--green)">-</span></div>
+    </div>
+    <iframe id="qsFrame" title="SolarX Analytics"></iframe>
+  </div>
+</div>
 
-    // ---------------------------
-    // Helpers
-    // ---------------------------
-    function setStatusUI(status){
-      const dot = document.getElementById("statusDot");
-      const text = document.getElementById("statusText");
-      const explain = document.getElementById("statusExplain");
-      const insight = document.getElementById("quickInsight");
+<script>
+const API_BASE = "https://qttukmuwnl.execute-api.ap-southeast-2.amazonaws.com/prod";
+const DEVICE_ID = "SolarX_Device_01";
+const EMBED_ENDPOINT = `${API_BASE}/embed`;
 
-      dot.classList.remove("good","warn","bad");
+function fmt(n, dp=2){
+  if(n === null || n === undefined) return "-";
+  const x = Number(n);
+  return Number.isNaN(x) ? "-" : x.toFixed(dp);
+}
 
-      if(status === "NORMAL"){
-        dot.classList.add("good");
-        text.textContent = "NORMAL";
-        explain.textContent = "Panel output matches baseline under similar light. No action needed.";
-        insight.textContent = "All good. SolarX is monitoring. If performance drops, it will trigger bounded auto-clean with escalation.";
-      } else if(status === "DIRTY"){
-        dot.classList.add("warn");
-        text.textContent = "DIRTY";
-        explain.textContent = "Output is below baseline under high light. System may trigger cleaning.";
-        insight.textContent = "Under strong light, output is under baseline. Auto-clean will run up to 3 attempts, then escalate to manual cleaning.";
-      } else if(status === "VERIFY_PENDING"){
-        dot.classList.add("warn");
-        text.textContent = "VERIFY PENDING";
-        explain.textContent = "Manual cleaning was reported. System is waiting for a new reading to verify recovery.";
-        insight.textContent = "Verification pending: SolarX will confirm whether performance returns above threshold after manual cleaning.";
-      } else if(status === "LOW_LIGHT"){
-        dot.classList.add("good");
-        text.textContent = "LOW LIGHT";
-        explain.textContent = "Light is too low for fair comparison. SolarX will not judge soiling right now.";
-        insight.textContent = "Low-light guard active. SolarX avoids false alarms at night/indoors.";
-      } else {
-        dot.classList.add("bad");
-        text.textContent = status;
-        explain.textContent = "Sensor data is incomplete or inconsistent. Please check device.";
-        insight.textContent = "Telemetry issue detected. Verify sensor wiring and readings pipeline.";
-      }
-    }
+function updateUI(d) {
+  const status = d.status || d.last_status;
+  const sr = parseFloat(d.soiling_ratio) || 0;
+  
+  // Update Text
+  document.getElementById("status").textContent = status;
+  document.getElementById("sr").textContent = fmt(sr, 2);
+  document.getElementById("power").textContent = fmt(d.power_w, 1) + "W";
+  document.getElementById("ep").textContent = fmt(d.expected_power_w, 1) + "W";
+  document.getElementById("lux").textContent = fmt(d.irradiance_lux, 0) + " lux";
+  document.getElementById("voltage").textContent = fmt(d.voltage_v, 1);
+  document.getElementById("current").textContent = fmt(d.current_a, 2);
+  document.getElementById("attempts").textContent = d.clean_attempts || 0;
+  document.getElementById("lastcmd").textContent = d.last_command_sent || "NONE";
+  document.getElementById("ts").textContent = "Last Updated: " + new Date(d.timestamp).toLocaleTimeString();
+  document.getElementById("src").textContent = d.status ? "AWS DYNAMODB (LIVE)" : "AWS STATE ENGINE";
 
-    function fmt(n, dp=2){
-      return (typeof n === "number") ? n.toFixed(dp) : n;
-    }
+  // Visual Logic: Status Pill & Glow
+  const dot = document.getElementById("dot");
+  const pill = document.getElementById("pill");
+  const bar = document.getElementById("srBar");
 
-    // ---------------------------
-    // Render UI
-    // ---------------------------
-    function render(data){
-      document.getElementById("deviceId").textContent = data.device_id;
-      document.getElementById("srTh").textContent = fmt(data.sr_threshold, 2);
-      document.getElementById("attemptsTxt").textContent = `${data.clean_attempts} / ${data.max_attempts}`;
-      document.getElementById("lastCmd").textContent = data.last_command;
+  if(status === "NORMAL") {
+    dot.style.background = "var(--green)";
+    pill.style.boxShadow = "0 0 15px rgba(51, 209, 122, 0.3)";
+    bar.style.backgroundColor = "var(--green)";
+  } else if(status === "DIRTY") {
+    dot.style.background = "var(--amber)";
+    pill.style.boxShadow = "0 0 15px rgba(255, 179, 0, 0.3)";
+    bar.style.backgroundColor = "var(--amber)";
+  } else {
+    dot.style.background = "var(--red)";
+    bar.style.backgroundColor = "var(--red)";
+  }
 
-      document.getElementById("luxVal").textContent = data.irradiance_lux;
-      document.getElementById("vVal").textContent = fmt(data.voltage_v, 2);
-      document.getElementById("iVal").textContent = fmt(data.current_a, 2);
-      document.getElementById("pVal").textContent = fmt(data.power_w, 2);
-      document.getElementById("srVal").textContent = fmt(data.sr, 2);
+  // Update Progress Bar width
+  bar.style.width = (sr * 100) + "%";
+}
 
-      // Explain automation
-      const auto = document.getElementById("autoExplain");
-      if(data.clean_attempts >= data.max_attempts){
-        auto.textContent = "Max attempts reached. System should request manual cleaning and verify recovery before resuming automation.";
-      } else {
-        auto.textContent = "If SR stays below threshold, SolarX retries cleaning (bounded). If still low after max attempts, it escalates to manual cleaning.";
-      }
+async function refresh(){
+  try {
+    const res = await fetch(`${API_BASE}/latest?device_id=${DEVICE_ID}`);
+    const d = await res.json();
+    updateUI(d);
+  } catch (e) {
+    console.error("Fetch error", e);
+  }
+}
 
-      // Log
-      document.getElementById("log").innerHTML = data.log.map(x => "• " + x).join("<br/>");
+async function loadEmbed(){
+  try {
+    const res = await fetch(EMBED_ENDPOINT);
+    const data = await res.json();
+    document.getElementById("qsFrame").src = data.embedUrl;
+  } catch (e) {
+    document.getElementById("toast").textContent = "QuickSight Sync Failed";
+  }
+}
 
-      // Status
-      setStatusUI(data.status);
+async function post(path, payload){
+  const toast = document.getElementById("toast");
+  toast.textContent = "Processing request...";
+  await fetch(`${API_BASE}${path}`, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify(payload)
+  });
+  toast.textContent = "Command executed successfully.";
+  setTimeout(() => toast.textContent = "", 3000);
+}
 
-      // Table
-      const tbody = document.getElementById("readingsBody");
-      tbody.innerHTML = "";
-      data.readings.forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r.t}</td>
-          <td><span style="color:${r.status==="DIRTY" ? "var(--warn)" : "var(--good)"}; font-weight:700">${r.status}</span></td>
-          <td>${fmt(r.sr,2)}</td>
-          <td>${fmt(r.p,2)}</td>
-          <td>${r.lux}</td>
-          <td>${r.note}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+function forceClean(){ post("/force-clean", { device_id: DEVICE_ID, duration_sec:20 }); }
+function manualDone(){ post("/manual-done", { device_id: DEVICE_ID }); }
 
-    // ---------------------------
-    // Charts
-    // ---------------------------
-    let srChart, pvChart;
+// Initial Load
+refresh();
+loadEmbed();
 
-    function initCharts(series){
-      const common = {
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{
-          legend:{ display:true, labels:{ color:"rgba(234,240,255,.75)" } },
-          tooltip:{ enabled:true }
-        },
-        scales:{
-          x:{ ticks:{ color:"rgba(234,240,255,.55)" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"rgba(234,240,255,.55)" }, grid:{ color:"rgba(255,255,255,.06)" } }
-        }
-      };
-
-      const srCtx = document.getElementById("srChart");
-      srCtx.parentElement.style.height = "260px";
-      srChart = new Chart(srCtx, {
-        type:"line",
-        data:{
-          labels: series.labels,
-          datasets:[
-            { label:"SR", data: series.sr, tension:.35, borderWidth:2, pointRadius:3 }
-          ]
-        },
-        options: {
-          ...common,
-          scales:{
-            ...common.scales,
-            y:{ ...common.scales.y, suggestedMin:0, suggestedMax:1 }
-          }
-        }
-      });
-
-      const pvCtx = document.getElementById("pvChart");
-      pvCtx.parentElement.style.height = "260px";
-      pvChart = new Chart(pvCtx, {
-        type:"line",
-        data:{
-          labels: series.labels,
-          datasets:[
-            { label:"Power (W)", data: series.power, tension:.35, borderWidth:2, pointRadius:3 },
-            { label:"Light (lux proxy)", data: series.lux, tension:.35, borderWidth:2, pointRadius:3, yAxisID:"y1" }
-          ]
-        },
-        options:{
-          ...common,
-          scales:{
-            x: common.scales.x,
-            y: { ...common.scales.y, title:{ display:true, text:"Power (W)", color:"rgba(234,240,255,.6)" } },
-            y1:{
-              position:"right",
-              ticks:{ color:"rgba(234,240,255,.55)" },
-              grid:{ drawOnChartArea:false },
-              title:{ display:true, text:"Lux (proxy)", color:"rgba(234,240,255,.6)" }
-            }
-          }
-        }
-      });
-    }
-
-    function updateCharts(series){
-      srChart.data.labels = series.labels;
-      srChart.data.datasets[0].data = series.sr;
-      srChart.update();
-
-      pvChart.data.labels = series.labels;
-      pvChart.data.datasets[0].data = series.power;
-      pvChart.data.datasets[1].data = series.lux;
-      pvChart.update();
-    }
-
-    // ---------------------------
-    // Demo button actions (replace with real AWS IoT publish later)
-    // ---------------------------
-    function pushLog(msg){
-      demoData.log.unshift(msg);
-      demoData.log = demoData.log.slice(0,4);
-      document.getElementById("log").innerHTML = demoData.log.map(x => "• " + x).join("<br/>");
-    }
-
-    document.getElementById("btnForce").addEventListener("click", () => {
-      pushLog("FORCE_CLEAN requested from dashboard.");
-      demoData.last_command = "FORCE_CLEAN";
-      demoData.status = "VERIFY_PENDING";
-      demoData.clean_attempts = Math.min(demoData.clean_attempts, demoData.max_attempts);
-      render(demoData);
-    });
-
-    document.getElementById("btnManual").addEventListener("click", () => {
-      pushLog("Manual Done pressed. Verification pending.");
-      demoData.last_command = "MANUAL_CLEAN";
-      demoData.status = "VERIFY_PENDING";
-      demoData.clean_attempts = 0;
-      render(demoData);
-    });
-
-    document.getElementById("btnRefresh").addEventListener("click", () => {
-      pushLog("Dashboard refreshed.");
-      render(demoData);
-      updateCharts(demoData.series);
-    });
-
-    // Clock
-    function tick(){
-      const d = new Date();
-      document.getElementById("nowTxt").textContent = d.toLocaleString();
-    }
-
-    // Init
-    tick();
-    setInterval(tick, 1000);
-    render(demoData);
-    initCharts(demoData.series);
-  </script>
+// Loops
+setInterval(refresh, 5000); // 5 sec live refresh
+setInterval(loadEmbed, 55 * 60 * 1000); // Refresh AWS Token every 55 mins
+</script>
 </body>
 </html>
