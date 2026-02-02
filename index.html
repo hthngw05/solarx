@@ -3,246 +3,372 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>SolarX Pro | Smart Monitoring</title>
+  <title>SolarX | Operator Console</title>
 
   <style>
-    :root {
-      --bg: #050814;
-      --panel: rgba(14, 22, 51, 0.8);
+    :root{
+      --bg1:#0b122a;
+      --bg2:#060913;
+      --card: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.10);
       --text: #e9eefc;
-      --muted: rgba(233, 238, 252, 0.6);
-      --stroke: rgba(255, 255, 255, 0.1);
-      --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      /* Status Colors */
-      --green: #33d17a;
-      --amber: #ffb300;
-      --red: #f66151;
-      --blue: #3584e4;
+      --muted: rgba(233,238,252,0.65);
+      --shadow: 0 18px 50px rgba(0,0,0,0.55);
+      --blue: #4c8dff;
+      --green:#33d17a;
+      --amber:#ffb300;
+      --red:#f66151;
+      --radius: 22px;
     }
 
-    * { box-sizing: border-box; transition: all 0.3s ease; }
-
-    body {
-      margin: 0;
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:28px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
       color: var(--text);
-      background: radial-gradient(circle at 10% 10%, #101c44 0%, var(--bg) 60%) fixed;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      padding: 30px;
+      background: radial-gradient(900px 500px at 12% 8%, #14275e 0%, var(--bg1) 45%, var(--bg2) 100%) fixed;
     }
 
-    .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-    h1 { margin: 0; font-weight: 800; letter-spacing: -1px; font-size: 32px; color: #fff; }
-
-    .wrap { display: grid; grid-template-columns: 450px 1fr; gap: 25px; align-items: start; }
-
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--stroke);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 24px;
-      backdrop-filter: blur(15px);
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:18px;
+      margin-bottom:18px;
     }
 
-    /* Status Glow Logic */
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      border-radius: 100px;
+    .brand h1{
+      margin:0;
+      font-size:28px;
+      font-weight:900;
+      letter-spacing:-0.5px;
+    }
+    .brand .sub{
+      margin-top:6px;
+      font-size:13px;
+      color: var(--muted);
+    }
+    .chip{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--stroke);
       background: rgba(255,255,255,0.05);
-      margin: 15px 0;
-      font-weight: 700;
-      text-transform: uppercase;
-      font-size: 13px;
+      font-size:12px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background: var(--amber);
+      box-shadow: 0 0 14px rgba(255,179,0,0.45);
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 360px 1fr;
+      gap:18px;
+      align-items:stretch;
+      min-height: calc(100vh - 90px);
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .panel{
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .section-title{
+      font-size:12px;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color: var(--muted);
+      font-weight:700;
+      margin-bottom:2px;
+    }
+
+    .control-block{
+      padding:14px;
+      border:1px solid var(--stroke);
+      border-radius: 18px;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .label{
+      font-size:12px;
+      color: var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:0.06em;
+    }
+
+    .value{
+      font-variant-numeric: tabular-nums;
+      font-weight:900;
+      font-size:20px;
+    }
+
+    input[type="range"]{
+      width:100%;
+      margin:10px 0 6px;
+      accent-color: var(--blue);
+    }
+
+    .hint{
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.35;
+    }
+
+    .btn{
+      width:100%;
+      padding:12px 14px;
+      border-radius: 16px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      font-weight:800;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .btn:active{ transform: translateY(0px); }
+    .btn.primary{
+      background: var(--blue);
+      border: none;
+      color: #06102a;
+    }
+    .btn.primary:hover{ filter: brightness(1.05); }
+    .btn.danger{
+      border-color: rgba(246,97,81,0.35);
+    }
+
+    .toast{
+      min-height:18px;
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    .analytics{
+      display:flex;
+      flex-direction:column;
+      padding:14px;
+      gap:10px;
+    }
+    .analytics-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:6px 6px 0;
+    }
+    .analytics-head .title{
+      font-weight:900;
+      font-size:16px;
+    }
+    .analytics-head .note{
+      font-size:12px;
+      color: var(--muted);
+    }
+
+    iframe{
+      width:100%;
+      height:100%;
+      min-height: 72vh;
+      border:0;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.22);
       border: 1px solid var(--stroke);
     }
 
-    /* KPI Display */
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-    .kpi-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 18px; border: 1px solid var(--stroke); }
-    .label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
-    .big { font-size: 32px; font-weight: 800; margin-top: 5px; font-variant-numeric: tabular-nums; }
-
-    /* Progress Bar for SR */
-    .sr-container { margin: 20px 0; }
-    .progress-bg { height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; margin-top: 10px; }
-    #srBar { height: 100%; width: 0%; border-radius: 10px; box-shadow: 0 0 15px currentColor; }
-
-    /* Table-like rows */
-    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--stroke); font-size: 14px; }
-    .info-row:last-child { border: none; }
-
-    .btn-group { display: flex; gap: 12px; margin-top: 25px; }
-    button {
-      flex: 1;
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.08);
-      color: white;
-      font-weight: 700;
-      cursor: pointer;
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+      iframe{ min-height: 65vh; }
     }
-    button:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
-    button:active { transform: translateY(0); }
-    .btn-primary { background: var(--blue); border: none; }
-
-    .toast-area { margin-top: 15px; height: 20px; font-size: 13px; font-style: italic; color: var(--blue); }
-
-    /* Right Side Analytics */
-    iframe { width: 100%; height: 600px; border-radius: 20px; border: 1px solid var(--stroke); background: #000; }
   </style>
 </head>
 
 <body>
-
-<div class="header-bar">
-  <h1>SolarX <span style="color:var(--blue)">PRO</span></h1>
-  <div id="ts" class="label" style="text-transform:none">Syncing...</div>
-</div>
-
-<div class="wrap">
-  <div class="card">
-    <div class="label">System Status</div>
-    <div id="pill" class="status-pill">
-      <span id="dot" style="width:12px; height:12px; border-radius:50%"></span>
-      <span id="status">CONNECTING...</span>
+  <div class="topbar">
+    <div class="brand">
+      <h1>SolarX <span style="color:var(--blue)">Operator Console</span></h1>
+      <div class="sub">Controls & configuration only. All analytics are in QuickSight.</div>
     </div>
 
-    <div class="sr-container">
-      <div class="label">Panel Efficiency (Soiling Ratio)</div>
-      <div id="sr" class="big">-</div>
-      <div class="progress-bg"><div id="srBar"></div></div>
+    <div class="chip" title="This is not telemetry; only web connectivity status.">
+      <span class="dot" id="netDot"></span>
+      <span id="netText">Connecting…</span>
     </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-box">
-        <div class="label">Current Power</div>
-        <div id="power" class="big">-</div>
-      </div>
-      <div class="kpi-box">
-        <div class="label">Expected</div>
-        <div id="ep" class="big" style="color:var(--muted)">-</div>
-      </div>
-    </div>
-
-    <div class="card" style="background:rgba(0,0,0,0.1); padding:15px; margin-bottom:15px;">
-      <div class="info-row"><span>Irradiance</span><span id="lux" class="v">-</span></div>
-      <div class="info-row"><span>Voltage / Current</span><span><span id="voltage">-</span>V / <span id="current">-</span>A</span></div>
-      <div class="info-row"><span>Clean Attempts</span><span id="attempts">-</span></div>
-      <div class="info-row"><span>Last Action</span><span id="lastcmd" style="color:var(--blue)">-</span></div>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn-primary" onclick="forceClean()">Trigger Auto-Clean</button>
-      <button onclick="manualDone()">Log Manual Repair</button>
-    </div>
-    <div id="toast" class="toast-area"></div>
   </div>
 
-  <div class="card" style="padding:10px">
-    <div style="padding:15px">
-      <div class="label">Live Performance Analytics</div>
-      <div style="font-size:12px; color:var(--muted)">Data Source: <span id="src" style="color:var(--green)">-</span></div>
+  <div class="layout">
+
+    <!-- LEFT: CONTROLS ONLY -->
+    <div class="card panel">
+      <div class="section-title">Controls</div>
+
+      <div class="control-block">
+        <div class="row">
+          <div class="label">Device</div>
+          <div class="value" id="deviceText">SolarX_Device_01</div>
+        </div>
+        <div class="hint" style="margin-top:8px">
+          Use the actions below to trigger cleaning workflows. The resulting metrics and history will appear inside the QuickSight dashboard.
+        </div>
+      </div>
+
+      <div class="control-block">
+        <div class="row">
+          <div class="label">Cleaning sensitivity</div>
+          <div class="value"><span id="thValue">0.80</span></div>
+        </div>
+
+        <input id="thSlider" type="range" min="0.50" max="0.95" step="0.01" value="0.80"/>
+
+        <div class="hint">
+          Lower threshold = more aggressive cleaning (triggers sooner).<br/>
+          Allowed range: 0.50 – 0.95
+        </div>
+
+        <button class="btn" style="margin-top:10px" onclick="saveThreshold()">Save Threshold</button>
+        <div class="toast" id="thToast"></div>
+      </div>
+
+      <div class="control-block">
+        <div class="section-title" style="margin-bottom:10px">Actions</div>
+        <button class="btn primary" onclick="forceClean()">Clean Panel Now</button>
+        <button class="btn danger" onclick="manualDone()">Manual Cleaning Completed</button>
+        <div class="toast" id="cmdToast"></div>
+      </div>
+
+      <div class="control-block">
+        <div class="section-title">Token refresh</div>
+        <div class="hint">
+          QuickSight embed URL refreshes automatically every 55 minutes.
+        </div>
+        <div class="hint" id="lastEmbed">Embed: not loaded yet</div>
+      </div>
+
     </div>
-    <iframe id="qsFrame" title="SolarX Analytics"></iframe>
+
+    <!-- RIGHT: QUICK SIGHT ONLY -->
+    <div class="card analytics">
+      <div class="analytics-head">
+        <div class="title">Performance Analytics</div>
+        <div class="note" id="lastUpdated">—</div>
+      </div>
+      <iframe id="qsFrame" title="SolarX QuickSight Dashboard"></iframe>
+    </div>
+
   </div>
-</div>
 
 <script>
-const API_BASE = "https://qttukmuwnl.execute-api.ap-southeast-2.amazonaws.com/prod";
-const DEVICE_ID = "SolarX_Device_01";
-const EMBED_ENDPOINT = `${API_BASE}/embed`;
+  const API_BASE = "https://qttukmuwnl.execute-api.ap-southeast-2.amazonaws.com/prod";
+  const DEVICE_ID = "SolarX_Device_01";
 
-function fmt(n, dp=2){
-  if(n === null || n === undefined) return "-";
-  const x = Number(n);
-  return Number.isNaN(x) ? "-" : x.toFixed(dp);
-}
+  const $ = (id) => document.getElementById(id);
 
-function updateUI(d) {
-  const status = d.status || d.last_status;
-  const sr = parseFloat(d.soiling_ratio) || 0;
-  
-  // Update Text
-  document.getElementById("status").textContent = status;
-  document.getElementById("sr").textContent = fmt(sr, 2);
-  document.getElementById("power").textContent = fmt(d.power_w, 1) + "W";
-  document.getElementById("ep").textContent = fmt(d.expected_power_w, 1) + "W";
-  document.getElementById("lux").textContent = fmt(d.irradiance_lux, 0) + " lux";
-  document.getElementById("voltage").textContent = fmt(d.voltage_v, 1);
-  document.getElementById("current").textContent = fmt(d.current_a, 2);
-  document.getElementById("attempts").textContent = d.clean_attempts || 0;
-  document.getElementById("lastcmd").textContent = d.last_command_sent || "NONE";
-  document.getElementById("ts").textContent = "Last Updated: " + new Date(d.timestamp).toLocaleTimeString();
-  document.getElementById("src").textContent = d.status ? "AWS DYNAMODB (LIVE)" : "AWS STATE ENGINE";
-
-  // Visual Logic: Status Pill & Glow
-  const dot = document.getElementById("dot");
-  const pill = document.getElementById("pill");
-  const bar = document.getElementById("srBar");
-
-  if(status === "NORMAL") {
-    dot.style.background = "var(--green)";
-    pill.style.boxShadow = "0 0 15px rgba(51, 209, 122, 0.3)";
-    bar.style.backgroundColor = "var(--green)";
-  } else if(status === "DIRTY") {
-    dot.style.background = "var(--amber)";
-    pill.style.boxShadow = "0 0 15px rgba(255, 179, 0, 0.3)";
-    bar.style.backgroundColor = "var(--amber)";
-  } else {
-    dot.style.background = "var(--red)";
-    bar.style.backgroundColor = "var(--red)";
+  function setNet(ok, text){
+    $("netText").textContent = text;
+    $("netDot").style.background = ok ? "var(--green)" : "var(--red)";
+    $("netDot").style.boxShadow = ok
+      ? "0 0 14px rgba(51,209,122,0.45)"
+      : "0 0 14px rgba(246,97,81,0.45)";
   }
 
-  // Update Progress Bar width
-  bar.style.width = (sr * 100) + "%";
-}
-
-async function refresh(){
-  try {
-    const res = await fetch(`${API_BASE}/latest?device_id=${DEVICE_ID}`);
-    const d = await res.json();
-    updateUI(d);
-  } catch (e) {
-    console.error("Fetch error", e);
-  }
-}
-
-async function loadEmbed(){
-  try {
-    const res = await fetch(EMBED_ENDPOINT);
-    const data = await res.json();
-    document.getElementById("qsFrame").src = data.embedUrl;
-  } catch (e) {
-    document.getElementById("toast").textContent = "QuickSight Sync Failed";
-  }
-}
-
-async function post(path, payload){
-  const toast = document.getElementById("toast");
-  toast.textContent = "Processing request...";
-  await fetch(`${API_BASE}${path}`, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify(payload)
+  // live update slider label
+  $("thSlider").addEventListener("input", () => {
+    $("thValue").textContent = Number($("thSlider").value).toFixed(2);
   });
-  toast.textContent = "Command executed successfully.";
-  setTimeout(() => toast.textContent = "", 3000);
-}
 
-function forceClean(){ post("/force-clean", { device_id: DEVICE_ID, duration_sec:20 }); }
-function manualDone(){ post("/manual-done", { device_id: DEVICE_ID }); }
+  async function post(path, payload){
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    let out = {};
+    try { out = await res.json(); } catch(e) {}
+    if(!res.ok || out.ok === false){
+      const msg = out.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return out;
+  }
 
-// Initial Load
-refresh();
-loadEmbed();
+  async function saveThreshold(){
+    $("thToast").textContent = "Saving…";
+    try{
+      const v = Number($("thSlider").value);
+      await post("/threshold", { device_id: DEVICE_ID, sr_threshold: v });
+      $("thToast").textContent = `Saved (${v.toFixed(2)})`;
+      setTimeout(()=> $("thToast").textContent="", 1800);
+    } catch(e){
+      $("thToast").textContent = "Failed: " + e.message;
+    }
+  }
 
-// Loops
-setInterval(refresh, 5000); // 5 sec live refresh
-setInterval(loadEmbed, 55 * 60 * 1000); // Refresh AWS Token every 55 mins
+  async function forceClean(){
+    $("cmdToast").textContent = "Sending CLEAN…";
+    try{
+      await post("/force-clean", { device_id: DEVICE_ID, duration_sec: 20 });
+      $("cmdToast").textContent = "CLEAN command sent.";
+      setTimeout(()=> $("cmdToast").textContent="", 1800);
+    } catch(e){
+      $("cmdToast").textContent = "Failed: " + e.message;
+    }
+  }
+
+  async function manualDone(){
+    $("cmdToast").textContent = "Logging manual cleaning…";
+    try{
+      await post("/manual-done", { device_id: DEVICE_ID });
+      $("cmdToast").textContent = "Manual cleaning logged.";
+      setTimeout(()=> $("cmdToast").textContent="", 1800);
+    } catch(e){
+      $("cmdToast").textContent = "Failed: " + e.message;
+    }
+  }
+
+  async function loadEmbed(){
+    try{
+      setNet(true, "Online");
+      const res = await fetch(`${API_BASE}/embed`);
+      const data = await res.json();
+      if(!data.embedUrl) throw new Error("embedUrl missing");
+      $("qsFrame").src = data.embedUrl;
+      const t = new Date();
+      $("lastEmbed").textContent = "Embed: refreshed " + t.toLocaleTimeString();
+      $("lastUpdated").textContent = "Embedded • " + t.toLocaleTimeString();
+    } catch(e){
+      setNet(false, "Embed failed");
+      $("lastEmbed").textContent = "Embed: failed (" + e.message + ")";
+    }
+  }
+
+  // Init
+  $("deviceText").textContent = DEVICE_ID;
+  loadEmbed();
+  setInterval(loadEmbed, 55 * 60 * 1000);
 </script>
+
 </body>
 </html>
