@@ -688,8 +688,740 @@
                 // Optional: sync slider to backend threshold if present
                 const th = Number(data.sr_threshold ?? data._state?.sr_threshold);
                 if (isFinite(th) && th >= 0.50 && th <= 0.95) {
+                    <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarX | Operator Console</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <script>
+        // Init Dark Mode
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            primary: '#10b981', /* Emerald 500 */
+                            secondary: '#34d399', /* Emerald 400 */
+                            accent: '#059669', /* Emerald 600 */
+                        }
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
+                    },
+                    animation: {
+                        'spin-slow': 'spin 20s linear infinite',
+                        'gradient': 'gradient 15s ease infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background: linear-gradient(-45deg, #f0fdf4, #ffffff, #ecfdf5, #f0f9ff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .dark body {
+            background: linear-gradient(-45deg, #022c22, #064e3b, #0f172a, #065f46);
+            background-size: 400% 400%;
+        }
+
+        /* Glass Card - Rapida Style (Hyper Rounded) */
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+            /* Softer, deeper shadow */
+            border-radius: 32px;
+            /* Rapida Roundness */
+            transform-style: preserve-3d;
+            will-change: transform;
+            transition: transform 0.1s ease-out, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dark .glass-card {
+            background: rgba(6, 78, 59, 0.4);
+            /* Emerald Tint in Dark */
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 20px 50px -12px rgba(16, 185, 129, 0.15);
+            /* Green glow hint */
+        }
+
+        .dark .glass-card:hover {
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Nav Pills - Floating Style */
+        .nav-container {
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            padding: 6px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .dark .nav-container {
+            background: rgba(6, 78, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-pill {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-pill.active {
+            background-color: #10b981;
+            /* Emerald 500 */
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transform: scale(1.05);
+        }
+
+        .dark .nav-pill.active {
+            background-color: #34d399;
+            /* Emerald 400 */
+            color: #022c22;
+            box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+        }
+
+        .nav-pill:not(.active) {
+            color: #64748b;
+        }
+
+        .dark .nav-pill:not(.active) {
+            color: #a7f3d0;
+        }
+
+        .nav-pill:not(.active):hover {
+            color: #059669;
+        }
+
+        /* Slider - Chunky */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 6px solid #10b981;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            cursor: pointer;
+            margin-top: -10px;
+            transition: transform 0.2s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        .dark input[type=range]::-webkit-slider-thumb {
+            border-color: #34d399;
+            background: #022c22;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #d1fae5;
+            /* Emerald 100 */
+            border-radius: 999px;
+        }
+
+        .dark input[type=range]::-webkit-slider-runnable-track {
+            background: #064e3b;
+        }
+
+        .hidden-tab {
+            display: none !important;
+        }
+
+        /* House masking */
+        .hero-house-img {
+            mask-image: radial-gradient(circle at center 50%, black 50%, transparent 95%);
+            -webkit-mask-image: radial-gradient(circle at center 50%, black 50%, transparent 95%);
+        }
+
+        /* Buttons - Rapida Green */
+        .btn-press:active {
+            transform: scale(0.96) translateZ(0);
+        }
+
+        .btn-rapida-primary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4);
+            border-radius: 20px;
+        }
+
+        .btn-rapida-primary:hover {
+            box-shadow: 0 15px 35px -5px rgba(5, 150, 105, 0.5);
+            filter: brightness(1.05);
+            transform: translateY(-2px);
+        }
+
+        .btn-rapida-secondary {
+            background: #ecfdf5;
+            color: #059669;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .dark .btn-rapida-secondary {
+            background: rgba(52, 211, 153, 0.1);
+            color: #34d399;
+        }
+
+        .btn-rapida-secondary:hover {
+            background: #d1fae5;
+            transform: translateY(-2px);
+        }
+
+        .dark .btn-rapida-secondary:hover {
+            background: rgba(52, 211, 153, 0.2);
+        }
+
+        /* 3D Effect Layers */
+        .card-content {
+            transform: translateZ(30px);
+        }
+
+        /* Staggered Entrance */
+        .stagger-in {
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="p-6 md:p-8 flex flex-col box-border selection:bg-emerald-100 selection:text-emerald-900 dark:selection:bg-emerald-900 dark:selection:text-emerald-50 dark:text-emerald-50 transition-colors duration-500">
+
+    <header class="flex items-center justify-between mb-8 shrink-0 h-[60px]">
+        <div class="flex items-center gap-4">
+            <div
+                class="text-white bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl p-3 shadow-lg shadow-emerald-500/20">
+                <i data-lucide="sun" class="w-6 h-6 fill-current animate-spin-slow"></i>
+            </div>
+            <span class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">SolarX</span>
+        </div>
+
+        <!-- Centered Nav -->
+        <nav class="nav-container flex items-center absolute left-1/2 -translate-x-1/2 z-50">
+            <button onclick="switchTab('console')" id="nav-console"
+                class="nav-pill active px-8 py-3 rounded-full text-sm font-bold tracking-wide">
+                Overview
+            </button>
+            <button onclick="switchTab('analytics')" id="nav-analytics"
+                class="nav-pill px-8 py-3 rounded-full text-sm font-bold tracking-wide">
+                Analytics
+            </button>
+        </nav>
+
+        <button onclick="toggleTheme()"
+            class="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:shadow-lg transition-all flex items-center justify-center group">
+            <i id="themeIcon" data-lucide="moon" class="w-6 h-6 group-hover:rotate-12 transition-transform"></i>
+        </button>
+    </header>
+
+    <main class="flex-1 relative w-full max-w-[1600px] mx-auto h-[calc(100vh-160px)]">
+
+        <div id="view-console" class="w-full h-full grid grid-cols-12 gap-8 lg:gap-10 transition-opacity duration-300">
+
+            <div class="col-span-12 lg:col-span-7 flex flex-col gap-6 h-full pb-4">
+
+                <div class="grid grid-cols-2 gap-6 flex-1">
+                    <!-- Power -->
+                    <div class="glass-card stagger-in p-8 flex flex-col justify-between group cursor-default" data-tilt
+                        style="animation-delay: 100ms">
+                        <div class="flex items-center gap-4 card-content">
+                            <div
+                                class="bg-orange-100 dark:bg-orange-500/20 p-3 rounded-[18px] text-orange-600 dark:text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i data-lucide="zap" class="w-6 h-6 fill-current"></i>
+                            </div>
+                            <span
+                                class="text-xs font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest">Power</span>
+                        </div>
+                        <div class="flex items-baseline gap-2 mt-2 card-content">
+                            <span id="kpiPower"
+                                class="text-6xl font-extrabold text-slate-900 dark:text-white tracking-tighter">--</span>
+                            <span class="text-xl text-slate-400 font-bold">W</span>
+                        </div>
+                    </div>
+
+                    <!-- Irradiance -->
+                    <div class="glass-card stagger-in p-8 flex flex-col justify-between group cursor-default" data-tilt
+                        style="animation-delay: 200ms">
+                        <div class="flex items-center gap-4 card-content">
+                            <div
+                                class="bg-yellow-100 dark:bg-yellow-500/20 p-3 rounded-[18px] text-yellow-600 dark:text-yellow-400 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i data-lucide="sun" class="w-6 h-6 fill-current"></i>
+                            </div>
+                            <span
+                                class="text-xs font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest">Irradiance</span>
+                        </div>
+                        <div class="flex items-baseline gap-2 mt-2 card-content">
+                            <span id="kpiLux"
+                                class="text-6xl font-extrabold text-slate-900 dark:text-white tracking-tighter">--</span>
+                            <span class="text-xl text-slate-400 font-bold">Lux</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 flex-1">
+                    <div class="glass-card stagger-in p-8 flex flex-col justify-between group cursor-default" data-tilt
+                        style="animation-delay: 300ms">
+                        <div class="flex items-center gap-4 card-content">
+                            <div
+                                class="bg-emerald-100 dark:bg-emerald-500/20 p-3 rounded-[18px] text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i data-lucide="sun-dim" class="w-6 h-6"></i>
+                            </div>
+                            <span
+                                class="text-xs font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest">Soiling</span>
+                        </div>
+                        <div class="flex items-baseline gap-2 mt-2 card-content">
+                            <span id="kpiSr"
+                                class="text-6xl font-extrabold text-slate-900 dark:text-white tracking-tighter">--</span>
+                            <span class="text-xl text-slate-400 font-bold">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Clean Attempts -->
+                    <div class="glass-card stagger-in p-8 flex flex-col justify-between group cursor-default" data-tilt
+                        style="animation-delay: 400ms">
+                        <div class="flex items-center gap-4 card-content">
+                            <div
+                                class="bg-blue-100 dark:bg-blue-500/20 p-3 rounded-[18px] text-blue-600 dark:text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                                <i data-lucide="droplets" class="w-6 h-6 fill-current"></i>
+                            </div>
+                            <span
+                                class="text-xs font-extrabold text-slate-400 dark:text-slate-400 uppercase tracking-widest">Cleaning Attempts</span>
+                        </div>
+                        <div class="flex items-baseline gap-2 mt-2 card-content">
+                            <span id="kpiAttempts"
+                                class="text-6xl font-extrabold text-slate-900 dark:text-white tracking-tighter">0</span>
+                            <span class="text-xl text-slate-400 font-bold">Cycle</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 flex-1">
+                    <div class="glass-card stagger-in p-8 flex flex-col justify-between" data-tilt
+                        style="animation-delay: 500ms">
+                        <div class="flex justify-between items-center card-content">
+                            <span class="font-bold text-slate-800 dark:text-white text-lg">Auto-Clean Threshold</span>
+                            <button onclick="saveThreshold()"
+                                class="text-[10px] bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-4 py-2 rounded-full font-bold text-slate-600 dark:text-slate-300 transition-colors uppercase tracking-widest">Save</button>
+                        </div>
+                        <div class="flex flex-col gap-2 card-content">
+                            <span class="text-5xl font-black text-slate-900 dark:text-white"
+                                id="sliderValue">0.70</span>
+                            <div class="pt-2">
+                                <input id="thSlider" type="range" min="0.50" max="0.95" step="0.01" value="0.70" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card stagger-in p-6 flex flex-col justify-center gap-5" data-tilt
+                        style="animation-delay: 600ms">
+                        <button onclick="forceClean()"
+                            class="card-content btn-rapida-primary w-full py-4 font-bold text-lg flex items-center justify-center gap-3 transition-transform">
+                            <i data-lucide="wind" class="w-6 h-6"></i> Force Clean
+                        </button>
+                        <button onclick="manualDone()"
+                            class="card-content btn-rapida-secondary w-full py-4 font-bold text-lg flex items-center justify-center gap-3 transition-transform">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i> Manual Cleaning Done
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-span-12 lg:col-span-5 h-full relative group flex items-center justify-center stagger-in"
+                style="animation-delay: 700ms">
+                <img src="house.png"
+                    class="absolute inset-0 w-full h-full object-contain object-bottom hero-house-img opacity-100"
+                    alt="House">
+
+                <div class="absolute bottom-6 left-8 right-8 flex items-end justify-between gap-4">
+
+                    <div class="glass-card bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl px-6 py-4 flex items-center gap-4 border border-white/50 dark:border-slate-700/50 shadow-2xl"
+                        data-tilt>
+                        <div id="rtIconBg"
+                            class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]"></div>
+                        <div>
+                            <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-1">System
+                                Status</div>
+                            <div id="rtStatusTitle"
+                                class="text-base font-extrabold text-slate-800 dark:text-white leading-none">Operational
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl px-6 py-4 flex flex-col items-end border border-white/50 dark:border-slate-700/50 shadow-2xl"
+                        data-tilt style="animation-delay: 1.5s">
+                        <div class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-1">Device ID</div>
+                        <div class="text-base font-extrabold font-mono text-slate-700 dark:text-slate-200 leading-none">
+                            SolarX_01</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- View: Analytics (QuickSight Only) -->
+        <div id="view-analytics" class="hidden-tab w-full h-full flex flex-col">
+            <iframe id="qsFrame" class="w-full h-full border-0 rounded-[40px] bg-white shadow-inner"
+                title="Analytics"></iframe>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-10 left-1/2 -translate-x-1/2 translate-y-32 opacity-0 transition-all duration-300 z-50">
+        <div
+            class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-white/10 dark:border-slate-200">
+            <i id="toastIcon" data-lucide="check-circle" class="w-6 h-6 text-emerald-400 dark:text-emerald-500"></i>
+            <span id="toastMsg" class="text-base font-bold tracking-wide">Action Successful</span>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "https://qttukmuwnl.execute-api.ap-southeast-2.amazonaws.com/prod";
+        const DEVICE_ID = "SolarX_Device_01";
+
+        const els = {
+            slider: document.getElementById('thSlider'),
+            sliderVal: document.getElementById('sliderValue'),
+            kpiSr: document.getElementById('kpiSr'),
+            kpiAttempts: document.getElementById('kpiAttempts'),
+            kpiLux: document.getElementById('kpiLux'),
+            kpiPower: document.getElementById('kpiPower'),
+            rtTitle: document.getElementById('rtStatusTitle'),
+            rtIconBg: document.getElementById('rtIconBg'),
+            qsFrame: document.getElementById('qsFrame'),
+            themeIcon: document.getElementById('themeIcon')
+        };
+
+        let embedRefreshTimer = null;
+        let latestTimer = null;
+
+        // --- 3D Tilt Logic ---
+        function initTilt() {
+            const cards = document.querySelectorAll('[data-tilt]');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    // Max rotation: 7 deg
+                    const rotateX = ((y - centerY) / centerY) * -5;
+                    const rotateY = ((x - centerX) / centerX) * 5;
+
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+                });
+            });
+        }
+
+        // --- Dark Mode Logic ---
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+                els.themeIcon.setAttribute('data-lucide', 'moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+                els.themeIcon.setAttribute('data-lucide', 'sun');
+            }
+            lucide.createIcons();
+        }
+
+        // Set initial icon
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            els.themeIcon.setAttribute('data-lucide', 'sun');
+        } else {
+            els.themeIcon.setAttribute('data-lucide', 'moon');
+        }
+
+
+        lucide.createIcons();
+        initTilt();
+
+        function renderThresholdValue() {
+            const v = Number(els.slider.value);
+            els.sliderVal.textContent = Math.round(v * 100) + "%";
+        }
+
+        els.slider.addEventListener('input', renderThresholdValue);
+        renderThresholdValue();
+
+        function fmt(x, digits = 0) {
+            const n = Number(x);
+            if (!isFinite(n)) return "—";
+            return n.toFixed(digits);
+        }
+
+        function normalizeStatus(s) {
+            const v = String(s || "").toUpperCase();
+            if (!v) return { title: "Unknown", color: "slate" };
+
+            if (v === "NORMAL") return { title: "Operational", color: "emerald" };
+            if (v === "DIRTY") return { title: "Cleaning Needed", color: "amber" };
+            if (v === "LOW_LIGHT") return { title: "Low Light", color: "blue" };
+            if (v === "VERIFY_PENDING") return { title: "Verifying Clean", color: "indigo" };
+            if (v === "CLEANING") return { title: "Cleaning Alert", color: "blue" };
+            return { title: v, color: "slate" };
+        }
+
+        async function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const tMsg = document.getElementById('toastMsg');
+            const tIcon = document.getElementById('toastIcon');
+
+            tMsg.textContent = msg;
+
+            if (type === 'error') {
+                tIcon.setAttribute('data-lucide', 'alert-circle');
+                tIcon.classList.remove('text-emerald-400'); tIcon.classList.remove('dark:text-emerald-500');
+                tIcon.classList.add('text-red-400');
+            } else {
+                tIcon.setAttribute('data-lucide', 'check-circle');
+                tIcon.classList.remove('text-red-400');
+                tIcon.classList.add('text-emerald-400'); tIcon.classList.add('dark:text-emerald-500');
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 2500);
+        }
+
+        function switchTab(tabName) {
+            const vConsole = document.getElementById('view-console');
+            const vAnalytics = document.getElementById('view-analytics');
+            const nConsole = document.getElementById('nav-console');
+            const nAnalytics = document.getElementById('nav-analytics');
+
+            if (tabName === 'console') {
+                vConsole.classList.remove('hidden-tab');
+                vAnalytics.classList.add('hidden-tab');
+                nConsole.classList.add('active');
+                nAnalytics.classList.remove('active');
+
+                stopEmbedAutoRefresh();
+                startLatestPolling();
+            } else {
+                vConsole.classList.add('hidden-tab');
+                vAnalytics.classList.remove('hidden-tab');
+                nConsole.classList.remove('active');
+                nAnalytics.classList.add('active');
+
+                stopLatestPolling();
+                loadEmbed();
+                startEmbedAutoRefresh();
+            }
+        }
+
+        async function postData(path, payload) {
+            const res = await fetch(`${API_BASE}${path}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || data.ok === false) throw new Error(data.error || "request failed");
+            return data;
+        }
+
+        async function saveThreshold() {
+            const val = Number(els.slider.value);
+            try {
+                await postData("/threshold", { device_id: DEVICE_ID, sr_threshold: val });
+                showToast(`Threshold saved: ${val.toFixed(2)}`);
+                refreshLatest();
+            } catch (e) {
+                showToast("Error: " + e.message, "error");
+            }
+        }
+
+        async function forceClean() {
+            try {
+                await postData("/force-clean", { device_id: DEVICE_ID, duration_sec: 20 });
+                showToast("Cleaning started");
+                refreshLatest();
+            } catch (e) {
+                showToast("Error: " + e.message, "error");
+            }
+        }
+
+        async function manualDone() {
+            try {
+                await postData("/manual-done", { device_id: DEVICE_ID });
+                showToast("Maintenance logged");
+                refreshLatest();
+            } catch (e) {
+                showToast("Error: " + e.message, "error");
+            }
+        }
+
+        async function refreshLatest() {
+            try {
+                const res = await fetch(`${API_BASE}/latest?device_id=${encodeURIComponent(DEVICE_ID)}`);
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || "latest failed");
+
+                const statusRaw =
+                    data.status_local ??
+                    data.status ??
+                    data.last_status ??
+                    data._state?.last_status ??
+                    "UNKNOWN";
+
+                const st = normalizeStatus(statusRaw);
+                els.rtTitle.textContent = st.title;
+
+                // Dot color
+                let colorClass = "bg-slate-500 shadow-slate-300";
+                if (st.color === "emerald") colorClass = "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]";
+                if (st.color === "amber") colorClass = "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]";
+                if (st.color === "blue") colorClass = "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]";
+                if (st.color === "indigo") colorClass = "bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.6)]";
+
+                els.rtIconBg.className = `w-3 h-3 rounded-full transition-colors duration-500 ${colorClass}`;
+
+                // KPIs: sr_local (0-1), light_raw, power_w, clean_attempts (from state)
+                const sr = Number(data.sr_local ?? data._latest?.sr_local ?? 0);
+                const lightRaw = Number(data.light_raw ?? data._latest?.light_raw ?? 0);
+                const powerW = Number(data.power_w ?? data._latest?.power_w ?? 0);
+                const attempts = Number(data.clean_attempts ?? data._state?.clean_attempts ?? 0);
+
+                els.kpiSr.textContent = fmt(sr * 100, 1);
+                els.kpiAttempts.textContent = fmt(attempts, 0);
+                els.kpiLux.textContent = fmt(lightRaw, 0);
+                els.kpiPower.textContent = fmt(powerW, 3);
+
+                const th = Number(data.sr_threshold ?? data._state?.sr_threshold);
+                if (isFinite(th) && th >= 0.50 && th <= 0.95) {
                     els.slider.value = th.toFixed(2);
                     renderThresholdValue();
+                }
+
+            } catch (e) {
+                console.warn("Polling failed", e);
+            }
+        }
+
+        async function loadEmbed() {
+            try {
+                const res = await fetch(`${API_BASE}/embed`);
+                const data = await res.json().catch(() => ({}));
+                if (!data.embedUrl) throw new Error("No URL");
+                els.qsFrame.src = data.embedUrl;
+            } catch (e) {
+                console.error("Embed failed", e);
+            }
+        }
+
+        function startEmbedAutoRefresh() {
+            stopEmbedAutoRefresh();
+            embedRefreshTimer = setInterval(loadEmbed, 55 * 60 * 1000);
+        }
+
+        function stopEmbedAutoRefresh() {
+            if (embedRefreshTimer) clearInterval(embedRefreshTimer);
+            embedRefreshTimer = null;
+        }
+
+        function startLatestPolling() {
+            stopLatestPolling();
+            refreshLatest();
+            latestTimer = setInterval(refreshLatest, 6000);
+        }
+
+        function stopLatestPolling() {
+            if (latestTimer) clearInterval(latestTimer);
+            latestTimer = null;
+        }
+
+        // Init
+        startLatestPolling();
+    </script>
+</body>
+
+</html>
                 }
 
             } catch (e) {
